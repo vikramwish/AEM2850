@@ -1,0 +1,89 @@
+# R / RStudio
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.Rapp.history
+
+# knitr / rmarkdown
+*_cache/
+cache/
+*/cache/
+*.knit.md
+*.utf8.md
+figure/
+figures/
+*/figure/
+*/figures/
+*.pandoc
+*.md.tmp
+
+# Quarto outputs
+_freeze/
+_site/
+_book/
+# Optional: ignore rendered docs (uncomment if you do NOT want to commit them)
+# *.html
+# *.pdf
+
+# LaTeX (PDF rendering intermediates)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.lot
+*.lof
+*.out
+*.toc
+*.synctex.gz
+*.run.xml
+*.nav
+*.snm
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# Python (if used)
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+.python-version
+
+# Node (if used)
+node_modules/
+*.tsbuildinfo
+
+# Logs / temp
+*.log
+*.tmp
+*~
+*.swp
+*.swo
+Thumbs.db
+
+# Data (optional — keep only if you don’t want raw data in git)
+# data/raw/
+# *.csv
+# *.tsv
+# *.xlsx
