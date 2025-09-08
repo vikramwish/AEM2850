@@ -102,7 +102,7 @@ flights |>
 ``` {r echo = TRUE}
 # sort flights by arrival delays in descending order
 flights |>
-  arrange(FALSE) # replace FALSE with your code
+    arrange(desc(arr_delay)) # replace FALSE with your code
 ```
 
 
