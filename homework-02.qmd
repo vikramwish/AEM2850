@@ -18,6 +18,9 @@ urlcolor: blue
 ```{r setup, include = FALSE}
 library(nycflights13)
 library(tidyverse)
+library(knitr)
+library(kableExtra)
+
 ```
 
 ## Preface
@@ -35,24 +38,25 @@ head(flights) # print the first six lines to fit on one page
 
 <!--- Please leave the code above unchanged. Questions start from here. --->
 
+I used the knitr and kableExtra libraries to improve how my results are displayed in the report. The knitr package provides the kable() function, which lets me convert data frames or tibbles into clean outputs as tables that you see generated in this pdf. 
+
 {{< pagebreak >}}
 
 ## 1. In this data set, `arr_delay` is a variable that records the arrival delays in minutes. Negative times represent early arrivals. Use dplyr::filter to find: (1) the flights that arrived more than two hours late, and (2) the flights that arrived earlier than scheduled. What is the proportion of flights that arrived more than two hours late? What is the proportion of flights that arrived earlier than scheduled time?
 <!-- Tip: Flights that arrived two hours late are those whose arrival delay is larger than 120 minutes. Flights that arrived earlier are those whose arrival delay is negative. -->
 ```{r echo = TRUE}
+
 # Use filter to find and count flights that arrived more than two hours late
 two_hour_late <- flights |>
-  filter(arr_delay > 120) |>   # arrival delay more than 120 minutes
-  count() 
-
+  filter(arr_delay > 120) |>
+  count(name = "n")
 # Use filter to find and count flights that arrived earlier than scheduled
 early_arr <- flights |>
-  filter(arr_delay < 0) |>     # arrival delay negative = early
-  count() 
-
-
+  filter(arr_delay < 0) |>
+  count(name = "n")
 # Count the total number of flights
-total <- count(flights)  
+total <- flights |> count(name = "n")
+
 
 ```
 A proportion of `r round(two_hour_late/total, 2)` of the flights arrived more than two hours late. A proportion of `r round(early_arr/total, 2)` of the flights arrived earlier than scheduled time.
@@ -64,8 +68,9 @@ A proportion of `r round(two_hour_late/total, 2)` of the flights arrived more th
 <!-- Tip: is.na() can help you find the missing values. Try to combine dplyr::filter with is.na(). The function count() will then count up the number of rows that meet that condition. -->
 ``` {r echo = TRUE}
 flights |>
-  filter(is.na(dep_time)) |> # replace FALSE with your code
-  count()
+  filter(is.na(dep_time)) |>
+  count(name = "n") |>
+  kable(digits = 0, col.names = c("Rows with Missing dep_time"))
 ```
 These rows probably represent **canceled flights**, since they have no recorded departure, arrival, or air times.
 
@@ -83,15 +88,20 @@ You can also use dplyr::relocate to reorder columns.
 ``` {r echo = TRUE}
 # Method 1: Use select() with column names directly
 flights |>
-  select(arr_delay, dep_time, sched_dep_time, 
-  dep_delay, arr_time, sched_arr_time)
+  select(arr_delay, dep_time, sched_dep_time, dep_delay, arr_time, sched_arr_time) |>
+  head(10) |>
+  kable(digits = 0, col.names = 
+  c("arr_delay","dep_time","sched_dep_time","dep_delay","arr_time","sched_arr_time"))
 
 
 # Method 2: : Use select() with tidyselect helpers
 
 flights |>
-  select(arr_delay, any_of(c("dep_time", "sched_dep_time", 
-  "dep_delay", "arr_time", "sched_arr_time")))
+  select(arr_delay, any_of(c("dep_time","sched_dep_time",
+  "dep_delay","arr_time","sched_arr_time"))) |>
+  head(10) |>
+  kable(digits = 0, col.names = c("arr_delay","dep_time","sched_dep_time",
+  "dep_delay","arr_time","sched_arr_time"))
 
 ```
 
@@ -102,7 +112,12 @@ flights |>
 ``` {r echo = TRUE}
 # sort flights by arrival delays in descending order
 flights |>
-    arrange(desc(arr_delay)) # replace FALSE with your code
+  arrange(desc(arr_delay)) |>
+  head(6) |>
+  select(year, month, day, dep_time, arr_time, 
+  arr_delay, carrier, flight, dest) |>
+  kable(digits = 0) |>
+  kable_styling(font_size = 8)
 ```
 
 
@@ -112,7 +127,7 @@ flights |>
 # assign the longest arrival delay to worst_delay
 worst_delay <- flights |>
   slice_max(arr_delay) |> # "slice" the row with the max value of arr_delay
-  pull() # fill in this function with your code
+  pull(arr_delay) # fill in this function with your code
 ```
 The worst arrival delay was `r worst_delay` minutes.
 
@@ -121,12 +136,17 @@ The worst arrival delay was `r worst_delay` minutes.
 
 ## 5. Select `air_time` and `distance`. Generate a new varible `speed` that is calculated as `distance` divided by `air_time` (in miles/min). Then create a variable `mph` that contains speed in miles/hour.
 ``` {r echo = TRUE}
+
 flights |>
-  select() |>  # select variables here
+  select(air_time, distance) |>
   mutate(
-    # create a new variable `speed`
-    # create a new variable `mph`
-    )
+    speed = distance / air_time,
+    mph   = speed * 60
+  ) |>
+  slice_head(n = 20) |>
+  kable(digits = 2, col.names = c("Air Time (min)", 
+  "Distance (miles)", "Speed (mi/min)", "Speed (mph)"))
+
 ```
 
 
@@ -137,17 +157,25 @@ flights |>
 Note: dplyr::summarize and dplyr::summarise are synonyms, so you can use whichever you are most comfortable with.-->
 ``` {r echo = TRUE}
 flights |>
-  group_by() |> # fill in this function with your code
-  summarize() # fill in this function with your code
+  group_by(carrier) |> 
+  summarize(avg_arr_delay = mean(arr_delay, na.rm = TRUE)) |> 
+  kable(
+    digits = 2,
+    col.names = c("Carrier", "Avg. Arrival Delay (min)")
+  )
 ```
 
 ## 6b. Which carrier has the longest average delay? Filter the row that corresponds to that carrier out of the data frame from part a.
 <!-- Tip: As we saw in question 4, we can use dplyr::slice_max(X) to filter the row that contains the maximum value of a variable X. -->
 ``` {r echo = TRUE}
 flights |>
-  group_by() |> # fill in this function with your code
-  summarize() |> # fill in this function with your code
-  slice_max(FALSE) # replace FALSE with your code
+  group_by(carrier) |> # fill in this function with your code
+  summarize(avg_arr_delay = mean(arr_delay, na.rm = TRUE)) |> 
+  slice_max(avg_arr_delay) |>  # replace FALSE with your code
+  kable(
+    digits = 2,
+    col.names = c("Carrier", "Avg. Arrival Delay (min)")
+  )
 ```
 
 
@@ -158,7 +186,19 @@ flights |>
 ``` {r echo = TRUE}
 # write your code here
 
+best_hours <- flights |>
+  group_by(hour) |>
+  summarize(
+    avg_arr_delay = mean(arr_delay, na.rm = TRUE),
+    n = n()
+  ) |>
+  arrange(avg_arr_delay)
 
+best_hours |>
+  kable(
+    digits = 2,
+    col.names = c("Hour", "Avg. Arrival Delay (min)", "Number of Flights")
+  )
 
 ```
-The best time to fly to avoid delays is...
+The best time to fly to avoid delays is typically during the early morning hours. Based on the data, the hours with the lowest average arrival delays are `r paste(best_hours$hour[1:3], collapse = ", ")`.
